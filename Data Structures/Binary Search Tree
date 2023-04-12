@@ -2,7 +2,8 @@
 // A Data Structures Project
 //
 // Author: Apostolos Skotis (Astol)
-// Last Updated: 10/4/2023
+// Last Updated: 12/4/2023
+// Version 0.2.124
 //
 // Documentation:
 // I try to make a header file for a binary search tree
@@ -44,23 +45,21 @@ private:
 
 
 
-
-
-    //traversing through the tree and storing the values in an easily iterable array using the algorithm:
-    // Left Child of A[i]: [2i], Right Child of A[i]: A[2i+1]
-    // Parent of Α[i]: A[i/2]
-    // on a 1-indexed array
-    void traversal_print(int* array, int node_index, node* tmp) const
-    {
-        if(tmp == nullptr) {
-            array[node_index] = null;
-            return;
-        }
-
-        array[node_index] = tmp->value;
-        traversal_print(array, 2*node_index, tmp->left);
-        traversal_print(array, 2*node_index + 1, tmp->right);
-    }
+//    //traversing through the tree and storing the values in an easily iterable array using the algorithm:
+//    // Left Child of A[i]: [2i], Right Child of A[i]: A[2i+1]
+//    // Parent of Α[i]: A[i/2]
+//    // on a 1-indexed array
+//    void traversal_print(int* array, int node_index, node* tmp) const
+//    {
+//        if(tmp == nullptr) {
+//            array[node_index] = null;
+//            return;
+//        }
+//
+//        array[node_index] = tmp->value;
+//        traversal_print(array, 2*node_index, tmp->left);
+//        traversal_print(array, 2*node_index + 1, tmp->right);
+//    }
 
 
 
@@ -166,13 +165,25 @@ public:
 
     }
 
-    void erase(T& val)
-    {
+    // returns the pointer to the node with the value val
+    node* locate(T& val) {
+        node *out = root;
+
+        while (val != out->value) {
+            if (val < out->value) out = out->left;
+            else out = out->right;
+        }
+
+        return out;
+    }
+
+    // returns the pointer to the parent of the node with the value val
+    node* locate_parent(T& val) {
         node* tmp = root;
         node* parent = root;
 
-        while(val != tmp->value) {
-            if(val < tmp->value) {
+        while (val != tmp->value) {
+            if (val < tmp->value) {
                 parent = tmp;
                 tmp = tmp->left;
             }
@@ -182,49 +193,66 @@ public:
             }
         }
 
-        if(tmp == nullptr) return; // the value didn't exist in the tree in the first place
+        return parent;
+    }
+
+
+    void erase(T& val) {
+        node *tmp = root;
+        node *parent = root;
+
+        //locating the node containing the value and its parent
+        parent = locate_parent(val);
+        if(val < parent->value) tmp = parent->left;
+        else tmp = parent->right;
+        
+
+        if (tmp == nullptr) return; // the value didn't exist in the tree in the first place
 
         // The 3 Cases of Node Deletion
         //
         // Case 1: Leaf Node (no children):
-        if(tmp->left == nullptr && tmp->right == nullptr) {
-            if(parent->left == tmp) parent->left = nullptr;
+        if (tmp->left == nullptr && tmp->right == nullptr) {
+            if(tmp == root) root = nullptr;
+            else if (parent->left == tmp) parent->left = nullptr;
             else parent->right = nullptr;
         }
         //Case 2.1: 1 child (right)
-        else if(tmp->left == nullptr) {
-            if(parent->left == tmp) {
-                parent->left = tmp->right;
+        else if (tmp->left == nullptr) {
+            if(tmp == root) {
+                root = root->right;
                 tmp->right = nullptr;
             }
-            else if(parent->right == tmp) {
+            else if (parent->left == tmp) {
+                parent->left = tmp->right;
+                tmp->right = nullptr;
+            } else if (parent->right == tmp) {
                 parent->right = tmp->right;
                 tmp->right = nullptr;
             }
         }
         //Case 2.2: 1 child (left)
         else if (tmp->right == nullptr) {
-            if(parent->left == tmp) {
-                parent->left = tmp->left;
+            if(tmp == root) {
+                root = root->left;
                 tmp->left = nullptr;
             }
-            else if(parent->right == tmp) {
+            else if (parent->left == tmp) {
+                parent->left = tmp->left;
+                tmp->left = nullptr;
+            } else if (parent->right == tmp) {
                 parent->right = tmp->left;
                 tmp->left = nullptr;
             }
         }
-        //Case 3: 2 children TODO
+        //Case 3: 2 children
         else {
-            if(parent->left == tmp) {
+            parent = tmp;
+            parent = parent->left;
+            while (parent->right != nullptr) parent = parent->right;
 
-
-
-            }
-            else if(parent->right == tmp) {
-
-
-
-            }
+            tmp->value = parent->value;
+            erase(parent->value);
         }
     }
 
@@ -255,31 +283,31 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const Tree tree) //TODO
     {
-        int* array = new int[tree.nodes + 1]; // array will be 1-indexed
-        tree.traversal_print(array, 1, tree.root);
-
-        int index = 1;
-
-
-        int height = tree.height();
-
-        for(int i = 0; i < height; ++i) {
-            for (int j = 0; j < height - 1 - i; ++j) out << " ";
-
-            for(int k = 0; k < i + 1; ++k) {
-                if(array[index] != tree.null) out << array[index];
-                else out << " ";
-                out << " ";
-
-                ++index;
-            }
-
-            for(int j = 0; j < height -1 - i; ++j) out << " ";
-
-            out << std::endl;
-        }
-
-        return out;
+//        int* array = new int[tree.nodes + 1]; // array will be 1-indexed
+//        tree.traversal_print(array, 1, tree.root);
+//
+//        int index = 1;
+//
+//
+//        int height = tree.height();
+//
+//        for(int i = 0; i < height; ++i) {
+//            for (int j = 0; j < height - 1 - i; ++j) out << " ";
+//
+//            for(int k = 0; k < i + 1; ++k) {
+//                if(array[index] != tree.null) out << array[index];
+//                else out << " ";
+//                out << " ";
+//
+//                ++index;
+//            }
+//
+//            for(int j = 0; j < height -1 - i; ++j) out << " ";
+//
+//            out << std::endl;
+//        }
+//
+//        return out;
     }
 
 
