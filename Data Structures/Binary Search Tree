@@ -1,0 +1,286 @@
+// Binary Search Tree - BST
+// A Data Structures Project
+//
+// Author: Apostolos Skotis (Astol)
+// Last Updated: 10/4/2023
+//
+// Documentation:
+// I try to make a header file for a binary search tree
+//
+//
+
+#include <iostream>
+#include <cmath>
+
+template <typename T>
+class Tree {
+
+private:
+
+    struct node {
+        T value;
+        node* left;
+        node* right;
+
+        explicit node(T val): value(val), left(nullptr), right(nullptr) {} // explicit is used in single parameter constructors to avoid implicit conversions that can cause unintentional bugs
+    };
+
+
+    int nodes;
+    int edges;
+    node* root;
+    T null; // a value that can't be found in a node of the tree, meant to show that a node is empty. Doesn't have to be defined if you are not going to use any of the following: operator<<
+
+
+    /* ============================================== Auxiliary Methods ============================================= */
+
+     int height_aux(node* tmp) const
+    {
+        if(tmp->left == nullptr && tmp->right == nullptr) return 1;
+        else if(tmp->left == nullptr) return height_aux(tmp->right) + 1;
+        else if (tmp->right == nullptr) return height_aux(tmp->left) + 1;
+        else return std::max(height_aux(tmp->left), height_aux(tmp->right)) + 1;
+    }
+
+
+
+
+
+    //traversing through the tree and storing the values in an easily iterable array using the algorithm:
+    // Left Child of A[i]: [2i], Right Child of A[i]: A[2i+1]
+    // Parent of Α[i]: A[i/2]
+    // on a 1-indexed array
+    void traversal_print(int* array, int node_index, node* tmp) const
+    {
+        if(tmp == nullptr) {
+            array[node_index] = null;
+            return;
+        }
+
+        array[node_index] = tmp->value;
+        traversal_print(array, 2*node_index, tmp->left);
+        traversal_print(array, 2*node_index + 1, tmp->right);
+    }
+
+
+
+public:
+
+    Tree(): nodes(0), edges(0), root(nullptr) {} // default constructor
+
+    Tree(Tree& tree): nodes(tree.nodes), edges(tree.edges), root(tree.root), null(tree.null) {} // copy constructor
+
+    template <typename G>
+    explicit Tree(G fill): nodes(fill.size()), edges(fill.size()), root(nullptr)  // fill-constructor: takes in an array like (array, vector, etc.) object and traverses through its items adding them as nodes. Helpful for making a tree fast.
+    {
+        for(T i : fill) this->add_node();
+    }
+
+
+    ~Tree() {}
+
+
+    // ====== Getters ======== //
+    int nodesN() const
+    {
+         return nodes;
+    }
+
+    int edgesN() const
+    {
+         return edges;
+    }
+    // ======================= //
+
+
+    bool isempty() const
+    {
+        return root == nullptr;
+    }
+
+    // Basic method for inserting a node if it doesn't already exist in the tree. If the node exists it does nothing.
+    void insert(T val) {
+        if(root == nullptr) {
+            root = new node(val);
+            ++nodes;
+            return;
+        }
+
+        node* tmp = root;
+
+        while(true) {
+            if(val < tmp->value) {
+                if(tmp->left == nullptr) {
+                    tmp->left = new node(val);
+                    ++nodes;
+                    ++edges;
+                    return;
+                }
+                else tmp = tmp->left;
+            }
+            else if(val > tmp->value) {
+                if(tmp->right == nullptr) {
+                    tmp->right = new node(val);
+                    ++nodes;
+                    ++edges;
+                    return;
+                }
+                else tmp = tmp->right;
+            }
+            else return; // if tha val already exists just return
+        }
+
+    }
+
+    // Same with insert but returns true if the node was added and false if the value already existed
+    bool insert_check(T val) {
+        if(root == nullptr) {
+            root = new node(val);
+            ++nodes;
+            return true;
+        }
+
+        node* tmp = root;
+
+        while(true) {
+            if(val < tmp->value) {
+                if(tmp->left == nullptr) {
+                    tmp->left = new node(val);
+                    ++nodes;
+                    ++edges;
+                    return true;
+                }
+                else tmp = tmp->left;
+            }
+            else if(val > tmp->value) {
+                if(tmp->right == nullptr) {
+                    tmp->right = new node(val);
+                    ++nodes;
+                    ++edges;
+                    return true;
+                }
+                else tmp = tmp->right;
+            }
+            else return false;
+        }
+
+    }
+
+    void erase(T& val)
+    {
+        node* tmp = root;
+        node* parent = root;
+
+        while(val != tmp->value) {
+            if(val < tmp->value) {
+                parent = tmp;
+                tmp = tmp->left;
+            }
+            else {
+                parent = tmp;
+                tmp = tmp->right;
+            }
+        }
+
+        if(tmp == nullptr) return; // the value didn't exist in the tree in the first place
+
+        // The 3 Cases of Node Deletion
+        //
+        // Case 1: Leaf Node (no children):
+        if(tmp->left == nullptr && tmp->right == nullptr) {
+            if(parent->left == tmp) parent->left = nullptr;
+            else parent->right = nullptr;
+        }
+        //Case 2.1: 1 child (right)
+        else if(tmp->left == nullptr) {
+            if(parent->left == tmp) {
+                parent->left = tmp->right;
+                tmp->right = nullptr;
+            }
+            else if(parent->right == tmp) {
+                parent->right = tmp->right;
+                tmp->right = nullptr;
+            }
+        }
+        //Case 2.2: 1 child (left)
+        else if (tmp->right == nullptr) {
+            if(parent->left == tmp) {
+                parent->left = tmp->left;
+                tmp->left = nullptr;
+            }
+            else if(parent->right == tmp) {
+                parent->right = tmp->left;
+                tmp->left = nullptr;
+            }
+        }
+        //Case 3: 2 children TODO
+        else {
+            if(parent->left == tmp) {
+
+
+
+            }
+            else if(parent->right == tmp) {
+
+
+
+            }
+        }
+    }
+
+    bool exists(T& val) const {
+        node* tmp = root;
+
+        while(val != tmp->value) {
+            if(val < tmp->value) tmp = tmp->left;
+            else tmp = tmp->right;
+        }
+
+        bool out = tmp == nullptr;
+        delete tmp;
+
+        return out;
+    }
+
+    int height() const
+    {
+        return height_aux(root);
+    }
+
+    int depth(T& val) const {}
+
+
+
+
+
+    friend std::ostream& operator<<(std::ostream& out, const Tree tree) //TODO
+    {
+        int* array = new int[tree.nodes + 1]; // array will be 1-indexed
+        tree.traversal_print(array, 1, tree.root);
+
+        int index = 1;
+
+
+        int height = tree.height();
+
+        for(int i = 0; i < height; ++i) {
+            for (int j = 0; j < height - 1 - i; ++j) out << " ";
+
+            for(int k = 0; k < i + 1; ++k) {
+                if(array[index] != tree.null) out << array[index];
+                else out << " ";
+                out << " ";
+
+                ++index;
+            }
+
+            for(int j = 0; j < height -1 - i; ++j) out << " ";
+
+            out << std::endl;
+        }
+
+        return out;
+    }
+
+
+};
