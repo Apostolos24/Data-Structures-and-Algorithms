@@ -2,8 +2,8 @@
 // A Data Structures Project
 //
 // Author: Apostolos Skotis (Astol)
-// Last Updated: 12/4/2023
-// Version 0.2.124
+// Last Updated: 2/5/2023
+// Version 0.2.0502
 //
 // Documentation:
 // I try to make a header file for a binary search tree
@@ -35,11 +35,11 @@ private:
 
     /* ============================================== Auxiliary Methods ============================================= */
 
-     int height_aux(node* tmp) const
+    int height_aux(node* tmp) const
     {
-        if(tmp->left == nullptr && tmp->right == nullptr) return 1;
-        else if(tmp->left == nullptr) return height_aux(tmp->right) + 1;
-        else if (tmp->right == nullptr) return height_aux(tmp->left) + 1;
+        if(tmp == nullptr) return -1;
+
+        if(tmp->left == nullptr && tmp->right == nullptr) return 0;
         else return std::max(height_aux(tmp->left), height_aux(tmp->right)) + 1;
     }
 
@@ -75,17 +75,16 @@ public:
         for(T i : fill) this->add_node();
     }
 
-
     ~Tree() {}
 
 
     // ====== Getters ======== //
-    int nodesN() const
+    int nodes_num() const
     {
          return nodes;
     }
 
-    int edgesN() const
+    int edges_num() const
     {
          return edges;
     }
@@ -98,7 +97,7 @@ public:
     }
 
     // Basic method for inserting a node if it doesn't already exist in the tree. If the node exists it does nothing.
-    void insert(T val) {
+    void insert(const T& val) {
         if(root == nullptr) {
             root = new node(val);
             ++nodes;
@@ -132,7 +131,7 @@ public:
     }
 
     // Same with insert but returns true if the node was added and false if the value already existed
-    bool insert_check(T val) {
+    bool insert_check(const T& val) {
         if(root == nullptr) {
             root = new node(val);
             ++nodes;
@@ -166,7 +165,7 @@ public:
     }
 
     // returns the pointer to the node with the value val
-    node* locate(T& val) {
+    node* locate(const T& val) {
         node *out = root;
 
         while (val != out->value) {
@@ -178,7 +177,7 @@ public:
     }
 
     // returns the pointer to the parent of the node with the value val
-    node* locate_parent(T& val) {
+    node* locate_parent(const T& val) {
         node* tmp = root;
         node* parent = root;
 
@@ -197,7 +196,7 @@ public:
     }
 
 
-    void erase(T& val) {
+    void erase(const T& val) {
         node *tmp = root;
         node *parent = root;
 
@@ -205,7 +204,7 @@ public:
         parent = locate_parent(val);
         if(val < parent->value) tmp = parent->left;
         else tmp = parent->right;
-        
+
 
         if (tmp == nullptr) return; // the value didn't exist in the tree in the first place
 
@@ -256,7 +255,7 @@ public:
         }
     }
 
-    bool exists(T& val) const {
+    bool exists(const T& val) const {
         node* tmp = root;
 
         while(val != tmp->value) {
@@ -270,12 +269,33 @@ public:
         return out;
     }
 
+    //Returns the length (# of edges) of the longest path from the root to a leaf.
+    // A leaf has a height of 0.
+    // An empty tree returns -1.
     int height() const
     {
         return height_aux(root);
     }
 
-    int depth(T& val) const {}
+
+    //Returns the length (# of edges) of the path from the root to the node of value val.
+    // The root has a depth of 0.
+    // In case the value doesn't exist it returns -1.
+    int depth(const T& val) const {
+        int depth = 0;
+        node *tmp = root;
+        if(root == nullptr) return -1;
+
+        while (val != tmp->value) {
+            if (val < tmp->value) tmp = tmp->left;
+            else tmp = tmp->right;
+            ++depth;
+
+            if(tmp == nullptr) return -1;
+        }
+
+        return depth;
+    }
 
 
 
